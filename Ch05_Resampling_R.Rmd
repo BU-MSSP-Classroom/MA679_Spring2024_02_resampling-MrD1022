@@ -1,7 +1,7 @@
 ---
 title: "Resampling"
-author: "Your Name Here"
-date: "2022-12-30"
+author: "Mingrui Du"
+date: "2024-02-03"
 output: html_document
 ---
 
@@ -17,6 +17,7 @@ pacman::p_load(
       , lubridate
       , AmesHousing
       )
+# use some framework
 ```
 
 
@@ -46,7 +47,7 @@ show_code <- TRUE
 
 ```{r,echo=show_code}
 library(AmesHousing)
-?ames_raw
+#?ames_raw
 ```
 
 Let's revisit the AmesHousing data.  As we did in the previous class, I will split the data into before 2008 and after.  The data up to 2008 will be the training data and after 2008 will be the testing data.
@@ -57,15 +58,18 @@ ames_raw_2009=ames_raw[ames_raw$`Yr Sold`>=2008,]
 ```
 
 
-
 * For the regression model fit, use bootstrap to compare the standard error estimates to the model based estimates.
 
 
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+lmfit_2008 <- lm(formula = log(SalePrice) ~ 
+                     `Year Built` + `Year Remod/Add` + 
+                     `Gr Liv Area` * `Total Bsmt SF` + `Garage Area` + 
+                     I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3), 
+                   data = ames_raw_2008)
+summary(lmfit_2008)
 ```
 
 Your answer:
@@ -152,14 +156,24 @@ Comment on the results obtained.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+a <- 1 - ( 1 - 1/100) ^ 100
+a
+m <- rep(NA, 100)
+for(k in 1:100){
+  store <- rep(NA, 10000)
+  for(i in 1:10000){
+    store[i] <- sum(sample (1:100 , rep=TRUE) == 4) > 0
+  }
+  m[k] <- mean(store)
+}
+mean(m)
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
+The probability of selecting 4th observation in a bootstrap data set is approximately 0.634. 
+To calculate the probability of one certain observation being included in a bootstrap set, the answer would be [1 - P(not included)^(bootstrap size)], in this case P = 1 - 1/100, bootstrap size (sample 1:100) equal to the original data size (number 1 to 100). 
 
 
 ~~~
