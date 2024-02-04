@@ -66,32 +66,46 @@ ames_raw_2009=ames_raw[ames_raw$`Yr Sold`>=2008,]
 
 Your code:
 
-```{r,echo=TRUE}
-lmfit_2008 <- lm(formula = log(SalePrice) ~ 
-                     `Year Built` + `Year Remod/Add` + 
+```{r,echo=TRUE, fig.width=8, fig.height=6}
+# model-based coefficients
+lmfit_2008 <- lm(log(SalePrice) ~ `Year Built` + `Year Remod/Add` + 
+                     `Gr Liv Area` * `Total Bsmt SF` + `Garage Area` + 
+                     I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3), data = ames_raw_2008)
+summary(lmfit_2008)$coef
+
+# bootstrap coefficients
+boot.fn <- function(data, index){
+  coef(lm(log(SalePrice) ~ `Year Built` + `Year Remod/Add` + 
                      `Gr Liv Area` * `Total Bsmt SF` + `Garage Area` + 
                      I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3), 
-                   data = ames_raw_2008)
-summary(lmfit_2008)
-bootstrap_coef <- function(data, indices) {
-  sample_data <- data[indices, ]  
-  fit <- lm(log(SalePrice) ~ `Year Built` + `Year Remod/Add` + 
-            `Gr Liv Area` * `Total Bsmt SF` + `Garage Area` + 
-            I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3), 
-            data = sample_data)
-  coef(fit)  
+          data = ames_raw_2008, 
+          subset = index))
 }
-set.seed(123) 
-boot_results <- boot(data = ames_raw_2008, statistic = bootstrap_coef, R = 1319)
-boot_se <- apply(boot_results$t, 2, sd)
+set.seed(1)
+#boot.fn(ames_raw_2008, sample(1319, 1319, replace = T))
+b <- boot(data = ames_raw_2008, boot.fn, R = 1000)
+b_se <- apply(b$t, 2, sd)
+se.compare <- data.frame(Name = names(coef(lmfit_2008)),
+                         Model = summary(lmfit_2008)$coef[, 2], 
+                         Boot = b_se)
+se.compare <- melt(se.compare[, c("Name", "Model", "Boot")], id.vars = "Name")
+
+b
+se <- se.compare[se.compare$value < 0.01, ]
+ggplot(se) +
+  aes(x = Name, y = value, group = variable, color = variable) +
+  geom_line() + geom_point() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Coefficient Names", y = "Std. Err", 
+       title = "Std. Err Comparison (Intercept excluded)",
+       caption = "Intercept excluded due to large magnitude")
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+In this model, bootstrapping seems to result in larger standard error that model based does.
 ~~~
 
 
@@ -100,15 +114,15 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+# MSE
+#ames_raw_2009 <- ames_raw_2009[!is.na(ames_raw_2009$SalePrice), ]
+sqrt(mean((ames_raw_2009$SalePrice - na.omit(exp(predict(lmfit_2008, ames_raw_2009))))^2))
+
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
 
 ~~~
 
@@ -118,20 +132,22 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-# fit_2008.knn <- train(formula = log(SalePrice) ~ 
-#                      `Year Built` + `Year Remod/Add` + 
-#                      `Gr Liv Area` * `Total Bsmt SF` + `Garage Area` + 
-#                      I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3), 
-#                    data = ames_raw_2008, method = "knn", tuneGrid = expand.grid(k = 2))
-# summary(fit_2008.knn)
+# k <- 1:20
+# fit_2008.knn <- train(formula = log(SalePrice) ~
+#                      `Year Built` + `Year Remod/Add` +
+#                      `Gr Liv Area` * `Total Bsmt SF` + `Garage Area` +
+#                      I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3),
+#                    data = ames_raw_2008, method = "knn", na.action = na.exclude,
+#                    tuneGrid = expand.grid(k = k),
+#                    trControl = trainControl(method = "cv", number = 10))
+# print(fit_2008.knn)
+## Error: Every row has at least one missing value were found
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+Failed to generate model because of NAs in predictors.
 ~~~
 
 
@@ -234,6 +250,9 @@ errors are normally distributed.
 Your code:
 
 ```{r,echo=TRUE, fig.width = 8, fig.height = 6}
+set.seed (1)
+x <- rnorm (100)
+y <- x - 2 * x^2 + rnorm (100)
 plot(x, y)
 ```
 
