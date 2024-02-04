@@ -15,6 +15,8 @@ pacman::p_load(
       , corrplot
       , RColorBrewer
       , lubridate
+      , ISLR2
+      , boot
       , AmesHousing
       )
 # use some framework
@@ -524,16 +526,17 @@ We will now consider the Boston housing data set, from the ISLR2 library.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+bos <- Boston
+#?Boston
+d <- Default
+hat_mu <- mean(bos$medv)
+hat_mu
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+The estimate mean of medv is 22.53281: median value of owner-occupied homes is $22,532.81 on average.
 ~~~
 
 
@@ -543,16 +546,18 @@ Hint: We can compute the standard error of the sample mean by dividing the sampl
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+# lm_bos_medv <- lm(medv ~ 1, bos)
+# summary(lm_bos_medv)
+medv_sd <- sd(bos$medv)
+n_bos <- nrow(bos)
+medv_se <- medv_sd / sqrt(n_bos)
+medv_se
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+The est. SE of hat_mu is 0.4089, same as summarized in null model. 
 ~~~
 
 
@@ -561,16 +566,25 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+#?boot
+set.seed(123)
+# bootstrap_means <- replicate(10000, mean(sample(bos$medv, replace = TRUE)))
+# SE_bootstrap <- sd(bootstrap_means)
+# SE_bootstrap
+# mean(sample(bos$medv, replace = TRUE))
+se_bootstrap <- rep(NA, 10000)
+for(i in 1:10000){
+  bos_bootstrap <- sample(bos$medv, replace = TRUE)
+  se_bootstrap[i] <- sd(bos_bootstrap)/sqrt(n_bos)
+}
+mean(se_bootstrap)
+#se_bootstrap <- mean(sd_bootstrap)/sqrt(n_bos)
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+The est. SE of hat_mu using bootstrap is 0.4080, this is slightly different from answer in (b) 
 ~~~
 
 (d) Based on your bootstrap estimate from (c), provide a 95% confidence interval for the mean of medv. Compare it to the results obtained using t.test(Boston$medv).
@@ -579,16 +593,15 @@ Hint: You can approximate a 95% confidence interval using the formula $[\hat{\mu
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+t.test(Boston$medv)
+ci_medv_bootstrap <- c(hat_mu - 2*se_bootstrap, hat_mu + 2*se_bootstrap)
+print(paste('95% CI based on bootstrap estimate: ', ci_medv_bootstrap[1], "," ,ci_medv_bootstrap[2]))
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+The two 95% CI are nearly the same. 
 ~~~
 
 
@@ -597,16 +610,14 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+median.medv <-  median(Boston$medv)
+cat("Est. Median of medv: ", median.medv)
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+The estimated median for medv is 21.2.
 ~~~
 
 
@@ -615,16 +626,14 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+se_med_bootstrap <- sd(replicate(10000, median(sample(bos$medv, replace = TRUE))))
+cat("SE (bootstrap): ", round(se_med_bootstrap,4))
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+SE of median medv is approximately 0.38 using bootstrap.
 ~~~
 
 
@@ -634,8 +643,7 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+
 ```
 
 Your answer:
