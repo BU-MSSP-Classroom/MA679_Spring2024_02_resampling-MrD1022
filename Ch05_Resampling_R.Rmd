@@ -72,6 +72,7 @@ lmfit_2008 <- lm(formula = log(SalePrice) ~
                      I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3), 
                    data = ames_raw_2008)
 summary(lmfit_2008)
+
 ```
 
 Your answer:
@@ -473,7 +474,7 @@ Your answer:
 
 ~~~
 Test error = (23+127)/5000 = 2.72%
-Test error is lightly different from above.
+Test error is slightly different from above.
 ~~~
 
 
@@ -486,17 +487,10 @@ We continue to consider the use of a logistic regression model to predict the pr
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+def_logit.1 <- glm(default ~ balance + income, 
+                   family = binomial, Default)
+summary(def_logit.1)$coefficients[2:3,2]
 ```
-
-Your answer:
-
-~~~
-Please write your answer in full sentences.
-
-
-~~~
 
 
 (b) Write a function, `boot.fn()`, that takes as input the Default data set as well as an index of the observations, and that outputs the coefficient estimates for income and balance in the multiple logistic regression model.
@@ -504,17 +498,19 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+#github @onmee
+# boot.fn = function(data, index){
+#   default = data$default[index]
+#   income = data$income[index]
+#   balance = data$balance[index]
+#   lr.fit2 = glm(default ~ income + balance, family = binomial)
+#   return(summary(def_logit.1)$coefficients[2:3,2])
+# }
 ```
 
 Your answer:
 
-~~~
-Please write your answer in full sentences.
 
-
-~~~
 
 (c) Use the boot() function together with your boot.fn() function to estimate the standard errors of the logistic regression coefficients for income and balance.
 
@@ -522,8 +518,8 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+# boot.fn(Default,1:length(Default$default))
+# boot(Default,boot.fn,100)
 ```
 
 Your answer:
