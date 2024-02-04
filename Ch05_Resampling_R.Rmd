@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE,message=FALSE,fig.align="center",fig.width=7,fig.height=2.5)
 pacman::p_load(
        car
+      , caret
       , ggplot2
       , ggExtra
       , reshape2
@@ -72,7 +73,17 @@ lmfit_2008 <- lm(formula = log(SalePrice) ~
                      I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3), 
                    data = ames_raw_2008)
 summary(lmfit_2008)
-
+bootstrap_coef <- function(data, indices) {
+  sample_data <- data[indices, ]  
+  fit <- lm(log(SalePrice) ~ `Year Built` + `Year Remod/Add` + 
+            `Gr Liv Area` * `Total Bsmt SF` + `Garage Area` + 
+            I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3), 
+            data = sample_data)
+  coef(fit)  
+}
+set.seed(123) 
+boot_results <- boot(data = ames_raw_2008, statistic = bootstrap_coef, R = 1319)
+boot_se <- apply(boot_results$t, 2, sd)
 ```
 
 Your answer:
@@ -107,8 +118,12 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+# fit_2008.knn <- train(formula = log(SalePrice) ~ 
+#                      `Year Built` + `Year Remod/Add` + 
+#                      `Gr Liv Area` * `Total Bsmt SF` + `Garage Area` + 
+#                      I(`Total Bsmt SF`^2) + I(`Total Bsmt SF`^3), 
+#                    data = ames_raw_2008, method = "knn", tuneGrid = expand.grid(k = 2))
+# summary(fit_2008.knn)
 ```
 
 Your answer:
