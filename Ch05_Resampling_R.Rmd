@@ -335,16 +335,16 @@ In Chapter 4, we used logistic regression to predict the probability of default 
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+#View(Default)
+def_logit.1 <- glm(default ~ balance + income, 
+                   family = binomial(link = "logit"), Default)
+summary(def_logit.1)
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+The model fit well as shown in parameters and AIC.
 ~~~
 
 
@@ -355,35 +355,21 @@ i. Split the sample set into a training set and a validation set.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+set.seed(123)
+train <- sample(10000, 5000)
+def_train <- Default[train, ]
+def_valid <- Default[-train, ]
 ```
 
-Your answer:
-
-~~~
-Please write your answer in full sentences.
-
-
-~~~
 
 ii. Fit a multiple logistic regression model using only the training observations.
 
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+def_logit.2 <- glm(default ~ balance + income, family = binomial, def_train)
+summary(def_logit.2)
 ```
-
-Your answer:
-
-~~~
-Please write your answer in full sentences.
-
-
-~~~
-
 
 iii. Obtain a prediction of default status for each individual in the validation set by computing the posterior probability of default for that individual, and classifying the individual to the default category if the posterior probability is greater than 0.5.
 
@@ -391,16 +377,19 @@ iii. Obtain a prediction of default status for each individual in the validation
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+def_prob.2 <- predict(def_logit.2, def_valid, type = "response")
+def_pred.2 <- ifelse(def_prob.2 < 0.5, "No", "Yes")
+# tst.err <- rep(NA, 500)
+# for(i in 1:500){
+#   tst.err[i] = logical(def_pred.2[i] != def_valid$default)
+# }
+
 ```
 
 Your answer:
 
 ~~~
 Please write your answer in full sentences.
-
-
 ~~~
 
 
@@ -409,16 +398,13 @@ iv. Compute the validation set error, which is the fraction of the observations 
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+table(def_pred.2, def_valid$default)
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+Test error = (117 + 21)/5000 = 0.0276 = 2.76%
 ~~~
 
 
@@ -428,16 +414,42 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+set.seed(12)
+train <- sample(10000, 5000)
+def_train <- Default[train, ]
+def_valid <- Default[-train, ]
+def_prob.3 <- predict(def_logit.2, def_valid, type = "response")
+def_pred.3 <- ifelse(def_prob.3 < 0.5, "No", "Yes")
+table(def_pred.3, def_valid$default)
+```
+
+```{r,echo=TRUE}
+set.seed(900)
+train <- sample(10000, 5000)
+def_train <- Default[train, ]
+def_valid <- Default[-train, ]
+def_prob.4 <- predict(def_logit.2, def_valid, type = "response")
+def_pred.4 <- ifelse(def_prob.4 < 0.5, "No", "Yes")
+table(def_pred.4, def_valid$default)
+```
+
+```{r,echo=TRUE}
+set.seed(2000)
+train <- sample(10000, 5000)
+def_train <- Default[train, ]
+def_valid <- Default[-train, ]
+def_prob.5 <- predict(def_logit.2, def_valid, type = "response")
+def_pred.5 <- ifelse(def_prob.5 < 0.5, "No", "Yes")
+table(def_pred.5, def_valid$default)
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+Test error for:
+60% traing set: (19+115)/5000 = 2.68%
+70% traing set: (18+115)/5000 = 2.66%
+80% traing set: (22+127)/5000 = 2.98%
 ~~~
 
 
@@ -447,16 +459,21 @@ Please write your answer in full sentences.
 Your code:
 
 ```{r,echo=TRUE}
-#
-#
+set.seed(123)
+train <- sample(10000, 5000)
+def_train <- Default[train, ]
+def_valid <- Default[-train, ]
+def_logit.dummy <- glm(default ~ balance + income + student, family = binomial, def_train)
+def_prob.6 <- predict(def_logit.dummy, def_valid, type = "response")
+def_pred.6 <- ifelse(def_prob.6 < 0.5, "No", "Yes")
+table(def_pred.6, def_valid$default)
 ```
 
 Your answer:
 
 ~~~
-Please write your answer in full sentences.
-
-
+Test error = (23+127)/5000 = 2.72%
+Test error is lightly different from above.
 ~~~
 
 
